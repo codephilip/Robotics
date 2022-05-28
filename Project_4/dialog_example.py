@@ -1,0 +1,181 @@
+import random as rd
+import shlex
+
+
+class entry():
+
+    def __init__(self, command, human, robot):
+        self.command = command
+        self.human = human
+        self.robot = robot
+        self.children = []
+        self.parent = None
+
+
+class definition():
+
+    def __init__(self, name, choices):
+        self.name = name
+        self.choices = shlex.split(choices)
+
+
+class dialog():
+    def __init__(self, text):
+
+        self.text = text  # File name
+        self.level = 0
+
+        self.top = []
+        self.definitionsList = []  # Definitions header location
+        self.dialogList = []  # Saves all possible diaglog options
+        self.recentEntry = entry(0, "error", "error")
+        self.validinput = []
+
+    def getLevel(self):
+        return self.level
+
+    def setLevel(self, newLevel):
+        self.level = newLevel
+        pass
+
+    def definitions(self, name, choices):  # Handles Defintions
+        choices.strip(" []")
+        choiceList = choices.split()
+        self.validinput = self.validinput + choiceList
+        def1 = definition(name, choices)
+
+    def proposition(self, command, robot):  # Handles Propositions
+        # Proposition work here
+        print("Proposition")
+        pass
+
+    def options(self, command, human, robot):  # Handles all other dialog
+        entry1 = entry(command, human, robot)
+        if entry1.command == 0:
+            if human[0] == "~":
+                for definition in self.definitionsList:
+
+                    if definition.name == human:
+                        for choice in definition.choices:
+                            entry2 = entry(command, choice, robot)
+                            self.dialogList.append(entry2)
+                            self.validinput.append(choice)
+            self.dialogList.append(entry1)
+            self.validinput.append(human)
+            # print("if1")
+        elif command == self.recentEntry.command + 1:
+            self.recentEntry.children.append(entry1)
+            entry1.parent = self.recentEntry
+            # print("if2")
+        elif command == self.recentEntry.command:
+            parent = self.recentEntry.parent
+            parent.children.append(entry1)
+            entry1.parent = parent
+            # print("if3")
+        else:
+            while (self.recentEntry.command >= command):
+                self.recentEntry = self.recentEntry.parent
+            self.recentEntry.children.append(entry1)
+            entry1.parent = self.recentEntry
+            # print("if4")
+        self.recentEntry = entry1
+
+    def textIn(self):  # Reads in the file text
+        file = open(self.text, "r")
+        for x in file:
+            self.line = x
+            self.dialog(self.line)
+        file.close()
+        pass
+
+    def dialog(self, line):  # Splits into proper dialog parts
+        line = line.strip()  # Removes leading and trailing spaces
+        line = line.lower()  # takes it to all lowercase
+        if line[0] == "#":  # Comment
+            pass
+            # print("Comment ignored")
+
+        elif line[0] == "~":  # Definition
+            (name, choices) = line.split(":")
+            self.definitions(name.lstrip("~"), choices.strip(" []"))
+            def1 = definition(name, choices.strip(" []"))
+            self.definitionsList.append(def1)
+
+        elif line[0] == "&":  # Proposition
+            (command, robot) = line.split(":")
+            self.proposition(command.strip(), robot.strip())
+
+        elif line[0].lower() == "u":
+            (command, human, robot) = line.split(":")
+            command = command.strip("u")
+            if command == "":
+                command = "0"
+            command = int(command)
+            if "[" in human:
+                human = human.strip("() []")
+                wordList = shlex.split(human)
+                for word in wordList:
+                    self.options(command, word, robot.strip())
+            else:
+                self.options(command, human.strip("( )"), robot.strip())
+
+        else:
+            print("Error")
+
+        pass
+
+
+##-------MAIN------
+
+dialogEng = dialog("dialog.txt")
+dialogEng.textIn()
+
+run = True
+while (run):  # Main execution loop
+    human = input()
+    print(human)
+    human = human.lower()
+    if human == "exit":
+        run = False
+    elif human in dialogEng.validinput:
+        for entry in dialogEng.dialogList:
+            if entry.human == human:
+                if "[" in entry.robot:
+                    answers = entry.robot.strip("[] ")
+                    answerList1 = shlex.split(answers)
+                    randomInt = rd.randint(0, len(answerList1))
+                    print(answerList1[randomInt - 1])
+                else:
+                    print(entry.robot)
+                if entry.children != []:
+                    currentEntry = entry
+                    dialogEng.level += 1
+                    while dialogEng.level != 0:
+                        validinputs = []
+                        for child in currentEntry.children:
+                            validinputs.append(child.human)
+                        human = input()
+                        if human in validinputs:
+                            for child in currentEntry.children:
+                                if child.human == human:
+                                    if "[" in child.robot:
+                                        answers = child.robot.strip("[] ")
+                                        answerList = shlex.split(answers)
+                                        randomInt = rd.randint(0, len(answerList))
+                                        print(answerList[randomInt - 1])
+                                    else:
+                                        print(child.robot)
+                                    currentEntry = child
+                                    if currentEntry.children != []:
+                                        dialogEng.level += 1
+                                    else:
+                                        dialogEng.level = 0
+                        elif human == "exit":
+                            dialogEng.level = 0
+                            run = False
+                        else:
+                            print("Invalid input")
+    else:
+        print("Invalid input")
+
+print("Goodbye. Program finished")
