@@ -20,7 +20,8 @@ is an essential part of any robotics project. You will create a user-friendly in
 Start, stop, pause, and resume the robot's actions.
 Visualization: Display real-time sensor data, robot status, and animations.
 Settings: Allow users to customize robot behavior and parameters.
-Animations
+
+#### Animations:
 To make your project visually engaging, you will incorporate animations. These animations can illustrate the robot's movements, sensor readings, and any other relevant visualizations. Consider using libraries like Pygame or Matplotlib for creating animations.
 
 ## Getting Started
@@ -30,7 +31,6 @@ Clone this repository to your local machine.
 Set up a Python virtual environment to manage dependencies.
 Install the required libraries and dependencies listed in the requirements.txt file.
 Explore the project structure and files.
-Begin implementing your robot controllers, GUI components, and animations.
 
 ## Project Usage
 Run the main Python script to start your robotics application.
