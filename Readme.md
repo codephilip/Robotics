@@ -1,4 +1,4 @@
-# Robotics Python Project Readme
+# Robotics Python Project
 ## Introduction
 Welcome to the Robotics Python Project! This project is designed to provide you with a hands-on experience in building robotics-related applications using Python. The project includes controllers, a graphical user interface (GUI), and animations to bring your robot to life.
 
